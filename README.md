@@ -1,4 +1,4 @@
-# ProjectName
+# Faithlife.OAuth
 
 Description
 
@@ -6,11 +6,11 @@ Description
 
 Ubuntu | Windows | NuGet
 --- | --- | ---
-[![Travis CI](https://img.shields.io/travis/Faithlife/RepoName/master.svg)](https://travis-ci.org/Faithlife/RepoName) | [![AppVeyor](https://img.shields.io/appveyor/ci/Faithlife/reponame/master.svg)](https://ci.appveyor.com/project/Faithlife/reponame) | [![NuGet](https://img.shields.io/nuget/v/ProjectName.svg)](https://www.nuget.org/packages/ProjectName)
+[![Travis CI](https://img.shields.io/travis/Faithlife/FaithlifeOAuth/master.svg)](https://travis-ci.org/Faithlife/FaithlifeOAuth) | [![AppVeyor](https://img.shields.io/appveyor/ci/Faithlife/faithlifeoauth/master.svg)](https://ci.appveyor.com/project/Faithlife/faithlifeoauth) | [![NuGet](https://img.shields.io/nuget/v/Faithlife.OAuth.svg)](https://www.nuget.org/packages/Faithlife.OAuth)
 
 ## Documentation
 
-https://faithlife.github.io/RepoName/
+https://faithlife.github.io/FaithlifeOAuth/
 
 ## License
 

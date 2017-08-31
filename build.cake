@@ -8,9 +8,9 @@ var nugetApiKey = Argument("nugetApiKey", "");
 var trigger = Argument("trigger", "");
 
 var nugetSource = "https://api.nuget.org/v3/index.json";
-var solutionFileName = "ProjectName.sln";
-var docsAssembly = File("src/ProjectName/bin/" + configuration + "/net46/ProjectName.dll").ToString();
-var docsSourceUri = "https://github.com/Faithlife/RepoName/tree/master/src/ProjectName";
+var solutionFileName = "Faithlife.OAuth.sln";
+var docsAssembly = File("src/Faithlife.OAuth/bin/" + configuration + "/net46/Faithlife.OAuth.dll").ToString();
+var docsSourceUri = "https://github.com/Faithlife/FaithlifeOAuth/tree/master/src/Faithlife.OAuth";
 
 Task("Clean")
 	.Does(() =>

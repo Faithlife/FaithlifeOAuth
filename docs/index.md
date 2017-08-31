@@ -1,12 +1,12 @@
-# ProjectName
+# Faithlife.OAuth
 
-**ProjectName** description
+**Faithlife.OAuth** description
 
 ## Installation
 
-ProjectName should be installed [via NuGet](https://www.nuget.org/packages/ProjectName).
+Faithlife.OAuth should be installed [via NuGet](https://www.nuget.org/packages/Faithlife.OAuth).
 
 ## Documentation
 
-* [Reference Documentation](ProjectName.md)
+* [Reference Documentation](Faithlife.OAuth.md)
 
