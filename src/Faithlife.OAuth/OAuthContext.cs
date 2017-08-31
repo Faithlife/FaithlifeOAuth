@@ -89,7 +89,7 @@ namespace Faithlife.OAuth
 		/// <summary>
 		/// Gets the access token secret.
 		/// </summary>
-		public SecureString AccessTokenSecret
+		public string AccessTokenSecret
 		{
 			get { return m_accessTokenSecret; }
 		}
@@ -143,7 +143,7 @@ namespace Faithlife.OAuth
 		/// </summary>
 		/// <param name="accessToken">The access token.</param>
 		/// <param name="accessSecret">The access secret.</param>
-		public void SetAccessTokenAndSecret(string accessToken, SecureString accessSecret)
+		public void SetAccessTokenAndSecret(string accessToken, string accessSecret)
 		{
 			m_accessToken = accessToken;
 			m_accessTokenSecret = accessSecret;
@@ -276,7 +276,7 @@ namespace Faithlife.OAuth
 
 		private string GetNormalizedKeyString(bool authorizedRequest)
 		{
-			return "{0}&{1}".FormatInvariant(Encode(m_consumerSecret), authorizedRequest ? SecureStringUtility.ToString(m_accessTokenSecret) : m_requestTokenSecret);
+			return "{0}&{1}".FormatInvariant(Encode(m_consumerSecret), authorizedRequest ? m_accessTokenSecret : m_requestTokenSecret);
 		}
 
 		private static string GetNormalizedUrl(Uri uri)
@@ -360,6 +360,6 @@ namespace Faithlife.OAuth
 		string m_requestToken;
 		string m_requestTokenSecret;
 		string m_accessToken;
-		SecureString m_accessTokenSecret;
+		string m_accessTokenSecret;
 	}
 }

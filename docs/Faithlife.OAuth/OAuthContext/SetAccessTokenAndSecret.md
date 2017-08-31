@@ -3,7 +3,7 @@
 Sets access credentials.
 
 ```csharp
-public void SetAccessTokenAndSecret(string accessToken, SecureString accessSecret)
+public void SetAccessTokenAndSecret(string accessToken, string accessSecret)
 ```
 
 | parameter | description |
@@ -13,7 +13,6 @@ public void SetAccessTokenAndSecret(string accessToken, SecureString accessSecre
 
 ## See Also
 
-* class [SecureString](../SecureString.md)
 * class [OAuthContext](../OAuthContext.md)
 * namespace [Faithlife.OAuth](../../Faithlife.OAuth.md)
 

@@ -29,7 +29,7 @@ namespace Faithlife.OAuth
 		/// <param name="httpResponseStream">The HTTP response stream.</param>
 		public static bool TrySetAccessTokenValues(OAuthContext context, Stream httpResponseStream)
 		{
-			return TrySetTokenAndSecret(httpResponseStream, (token, secret) => context.SetAccessTokenAndSecret(token, SecureStringUtility.FromString(secret)));
+			return TrySetTokenAndSecret(httpResponseStream, (token, secret) => context.SetAccessTokenAndSecret(token, secret));
 		}
 
 		/// <summary>

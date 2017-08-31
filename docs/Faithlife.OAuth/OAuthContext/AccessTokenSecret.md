@@ -3,12 +3,11 @@
 Gets the access token secret.
 
 ```csharp
-public SecureString AccessTokenSecret { get; }
+public string AccessTokenSecret { get; }
 ```
 
 ## See Also
 
-* class [SecureString](../SecureString.md)
 * class [OAuthContext](../OAuthContext.md)
 * namespace [Faithlife.OAuth](../../Faithlife.OAuth.md)
 
