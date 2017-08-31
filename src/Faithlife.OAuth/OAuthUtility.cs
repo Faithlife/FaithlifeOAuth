@@ -272,7 +272,7 @@ namespace Faithlife.OAuth
 			return query.Substring(1)
 				.Split('&')
 				.Select(str => str.Split(new[] { '=' }, 2))
-				.Select(x => new KeyValuePair<string, string>(UrlEncoding.Decode(x[0]), x.Length == 1 ? "" : UrlEncoding.Decode(x[1])));
+				.Select(x => new KeyValuePair<string, string>(UrlEncoding.Decode(x[0], UrlEncodingSettings.HttpUtilitySettings), x.Length == 1 ? "" : UrlEncoding.Decode(x[1], UrlEncodingSettings.HttpUtilitySettings)));
 		}
 
 		private static bool IsUnreserved(byte value)
