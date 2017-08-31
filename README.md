@@ -1,6 +1,6 @@
 # Faithlife.OAuth
 
-Description
+Generates OAuth 1.0 signatures for web service requests.
 
 ## Build Status
 
