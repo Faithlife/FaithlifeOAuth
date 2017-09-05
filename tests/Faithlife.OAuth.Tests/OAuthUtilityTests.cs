@@ -86,6 +86,7 @@ namespace Faithlife.OAuth.Tests
 		[TestCase("?659347508784", "659347508784", "")]
 		[TestCase("?q=%25%26%3D&a=b&s=%22123%22", "q", "%&=", "a", "b", "s", "\"123\"")]
 		[TestCase("?b5=%3D%253D&a3=a&c%40=&a2=r%20b", "b5", "=%3D", "a3", "a", "c@", "", "a2", "r b", Description = "From https://tools.ietf.org/html/rfc5849#section-3.4.1.3.1")]
+		[TestCase("?c2&a3=2+q", "c2", "", "a3", "2 q", Description = "From POST body in https://tools.ietf.org/html/rfc5849#section-3.4.1.3.1")]
 		[TestCase("")]
 		[TestCase("?")]
 		[TestCase(null)]
