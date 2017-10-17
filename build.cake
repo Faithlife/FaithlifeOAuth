@@ -1,4 +1,5 @@
-#tool "nuget:?package=XmlDocMarkdown&version=0.5.4"
+#addin "Cake.Git"
+#tool "nuget:?package=XmlDocMarkdown&version=0.5.6"
 
 using System.Text.RegularExpressions;
 
@@ -6,10 +7,15 @@ var target = Argument("target", "Default");
 var configuration = Argument("configuration", "Release");
 var nugetApiKey = Argument("nugetApiKey", "");
 var trigger = Argument("trigger", "");
+var versionSuffix = Argument("versionSuffix", "");
+
+var buildBotUserName = "faithlifebuildbot";
+var buildBotPassword = EnvironmentVariable("BUILD_BOT_PASSWORD");
 
 var nugetSource = "https://api.nuget.org/v3/index.json";
 var solutionFileName = "Faithlife.OAuth.sln";
-var docsAssembly = File("src/Faithlife.OAuth/bin/" + configuration + "/net46/Faithlife.OAuth.dll").ToString();
+var docsAssembly = File($"src/Faithlife.OAuth/bin/{configuration}/net461/Faithlife.OAuth.dll").ToString();
+var docsRepoUri = "https://github.com/Faithlife/FaithlifeOAuth.git";
 var docsSourceUri = "https://github.com/Faithlife/FaithlifeOAuth/tree/master/src/Faithlife.OAuth";
 
 Task("Clean")
@@ -33,16 +39,36 @@ Task("Rebuild")
 	.IsDependentOn("Clean")
 	.IsDependentOn("Build");
 
-Task("GenerateDocs")
+Task("UpdateDocs")
+	.WithCriteria(!string.IsNullOrEmpty(buildBotPassword))
+	.WithCriteria(EnvironmentVariable("APPVEYOR_REPO_BRANCH") == "master")
 	.IsDependentOn("Build")
-	.Does(() => GenerateDocs(docsAssembly, docsSourceUri, verify: false));
-
-Task("VerifyGenerateDocs")
-	.IsDependentOn("Build")
-	.Does(() => GenerateDocs(docsAssembly, docsSourceUri, verify: true));
+	.Does(() =>
+	{
+		var branchName = "gh-pages";
+		var docsDirectory = new DirectoryPath(branchName);
+		GitClone(docsRepoUri, docsDirectory, new GitCloneSettings { BranchName = branchName });
+		var exePath = File("cake/xmldocmarkdown.0.5.6/XmlDocMarkdown/tools/XmlDocMarkdown.exe").ToString();
+		var arguments = $@"{docsAssembly} {branchName}{System.IO.Path.DirectorySeparatorChar} --source ""{docsSourceUri}"" --newline lf --clean";
+		int exitCode = StartProcess(exePath, arguments);
+		if (exitCode != 0)
+			throw new InvalidOperationException($"Docs generation failed with exit code {exitCode}.");
+		if (GitHasUncommitedChanges(docsDirectory))
+		{
+			Information("Committing all documentation changes.");
+			GitAddAll(docsDirectory);
+			GitCommit(docsDirectory, "Faithlife Build Bot", "faithlifebuildbot@users.noreply.github.com", "Automatic documentation update.");
+			Information("Pushing updated documentation to GitHub.");
+			GitPush(docsDirectory, buildBotUserName, buildBotPassword, branchName);
+		}
+		else
+		{
+			Information("No documentation changes detected.");
+		}
+	});
 
 Task("Test")
-	.IsDependentOn("VerifyGenerateDocs")
+	.IsDependentOn("Build")
 	.Does(() =>
 	{
 		foreach (var projectPath in GetFiles("tests/**/*.csproj").Select(x => x.FullPath))
@@ -52,10 +78,13 @@ Task("Test")
 Task("NuGetPackage")
 	.IsDependentOn("Rebuild")
 	.IsDependentOn("Test")
+	.IsDependentOn("UpdateDocs")
 	.Does(() =>
 	{
+		if (string.IsNullOrEmpty(versionSuffix) && !string.IsNullOrEmpty(trigger))
+			versionSuffix = Regex.Match(trigger, @"^v[^\.]+\.[^\.]+\.[^\.]+-(.+)").Groups[1].ToString();
 		foreach (var projectPath in GetFiles("src/**/*.csproj").Select(x => x.FullPath))
-			DotNetCorePack(projectPath, new DotNetCorePackSettings { Configuration = configuration, OutputDirectory = "release" });
+			DotNetCorePack(projectPath, new DotNetCorePackSettings { Configuration = configuration, OutputDirectory = "release", VersionSuffix = versionSuffix });
 	});
 
 Task("NuGetPublish")
@@ -71,13 +100,13 @@ Task("NuGetPublish")
 			if (version == null)
 				version = nupkgVersion;
 			else if (version != nupkgVersion)
-				throw new InvalidOperationException("Mismatched package versions '" + version + "' and '" + nupkgVersion + "'.");
+				throw new InvalidOperationException($"Mismatched package versions '{version}' and '{nupkgVersion}'.");
 		}
 
 		if (!string.IsNullOrEmpty(nugetApiKey) && (trigger == null || Regex.IsMatch(trigger, "^v[0-9]")))
 		{
-			if (trigger != null && trigger != "v" + version)
-				throw new InvalidOperationException("Trigger '" + trigger + "' doesn't match package version '" + version + "'.");
+			if (trigger != null && trigger != $"v{version}")
+				throw new InvalidOperationException($"Trigger '{trigger}' doesn't match package version '{version}'.");
 
 			var pushSettings = new NuGetPushSettings { ApiKey = nugetApiKey, Source = nugetSource };
 			foreach (var nupkgPath in nupkgPaths)
@@ -92,27 +121,11 @@ Task("NuGetPublish")
 Task("Default")
 	.IsDependentOn("Test");
 
-void GenerateDocs(string docsAssembly, string docsSourceUri, bool verify)
-{
-	var exePath = File("cake/XmlDocMarkdown/tools/XmlDocMarkdown.exe").ToString();
-	var arguments = docsAssembly + " docs" + System.IO.Path.DirectorySeparatorChar + @" --source """ + docsSourceUri + @""" --newline lf --clean" + (verify ? " --verify" : "");
-	if (Context.Environment.Platform.IsUnix())
-	{
-		arguments = exePath + " " + arguments;
-		exePath = "mono";
-	}
-	int exitCode = StartProcess(exePath, arguments);
-	if (exitCode == 1 && verify)
-		throw new InvalidOperationException("Generated docs don't match; use -target=GenerateDocs to regenerate.");
-	else if (exitCode != 0)
-		throw new InvalidOperationException(string.Format("Docs generation failed with exit code {0}.", exitCode));
-}
-
 void ExecuteProcess(string exePath, string arguments)
 {
 	int exitCode = StartProcess(exePath, arguments);
 	if (exitCode != 0)
-		throw new InvalidOperationException(string.Format("{0} failed with exit code {1}.", exePath, exitCode));
+		throw new InvalidOperationException($"{exePath} failed with exit code {exitCode}.");
 }
 
 RunTarget(target);

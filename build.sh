@@ -10,7 +10,7 @@ SCRIPT_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 TOOLS_DIR=$SCRIPT_DIR/cake
 NUGET_EXE=$TOOLS_DIR/nuget.exe
 NUGET_URL=https://dist.nuget.org/win-x86-commandline/latest/nuget.exe
-CAKE_VERSION=0.21.1
+CAKE_VERSION=0.23.0
 CAKE_EXE=$TOOLS_DIR/Cake.$CAKE_VERSION/Cake.exe
 
 # Define default arguments.
@@ -30,7 +30,7 @@ if [ ! -f "$NUGET_EXE" ]; then
     echo "Downloading NuGet..."
     curl -Lsfo "$NUGET_EXE" $NUGET_URL
     if [ $? -ne 0 ]; then
-        echo "An error occured while downloading nuget.exe."
+        echo "An error occurred while downloading nuget.exe."
         exit 1
     fi
 fi
@@ -42,7 +42,7 @@ fi
 if [ ! -f "$CAKE_EXE" ]; then
     mono "$NUGET_EXE" install Cake -Version $CAKE_VERSION -OutputDirectory "$TOOLS_DIR"
     if [ $? -ne 0 ]; then
-        echo "An error occured while installing Cake."
+        echo "An error occurred while installing Cake."
         exit 1
     fi
 fi
@@ -60,4 +60,4 @@ fi
 export MONO_ROOT=$(dirname $(which mono))/../
 
 # Start Cake
-exec mono "$CAKE_EXE" build.cake --paths_tools=cake --experimental "${SCRIPT_ARGUMENTS[@]}"
+exec mono "$CAKE_EXE" build.cake --paths_tools=cake --experimental ${SCRIPT_ARGUMENTS[@]}
