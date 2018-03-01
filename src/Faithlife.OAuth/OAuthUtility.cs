@@ -4,7 +4,6 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using Faithlife.Utility;
-using Faithlife.Utility.Invariant;
 
 namespace Faithlife.OAuth
 {
@@ -191,7 +190,7 @@ namespace Faithlife.OAuth
 
 		internal static string CreateSignatureBase(Uri uri, string httpMethod, ICollection<KeyValuePair<string, string>> parameters, out string newUri)
 		{
-			if (httpMethod.IsNullOrEmpty())
+			if (string.IsNullOrEmpty(httpMethod))
 				throw new ArgumentNullException("httpMethod");
 
 			parameters.AddRange(GetQueryParameters(uri.Query));
@@ -220,7 +219,7 @@ namespace Faithlife.OAuth
 				{ OAuthConstants.Signature, signature },
 				{ OAuthConstants.SignatureMethod, OAuthSignatureMethods.PlainText },
 				{ OAuthConstants.Version, OAuthConstants.OAuthVersion }
-			}.Union(additionalParameters).ToDictionary();
+			}.Union(additionalParameters).ToDictionary(x => x.Key, x => x.Value);
 
 			return OAuthConstants.HeaderPrefix + " " + parameters
 				.Where(parameter => parameter.Value != null)
@@ -261,7 +260,7 @@ namespace Faithlife.OAuth
 				{ OAuthConstants.SignatureMethod, OAuthSignatureMethods.HmacSha1 },
 				{ OAuthConstants.TimeStamp, timeStamp },
 				{ OAuthConstants.Version, OAuthConstants.OAuthVersion }
-			}.Union(additionalParameters.EmptyIfNull().Where(kvp => kvp.Value != null)).ToDictionary();
+			}.Union(additionalParameters?.Where(kvp => kvp.Value != null) ?? new Dictionary<string, string>()).ToDictionary(x => x.Key, x => x.Value);
 		}
 
 		internal static IEnumerable<KeyValuePair<string, string>> GetQueryParameters(string query)

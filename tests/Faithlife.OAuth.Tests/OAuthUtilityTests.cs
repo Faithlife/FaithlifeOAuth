@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Faithlife.Utility;
-using Faithlife.Utility.Invariant;
 using NUnit.Framework;
 
 namespace Faithlife.OAuth.Tests
