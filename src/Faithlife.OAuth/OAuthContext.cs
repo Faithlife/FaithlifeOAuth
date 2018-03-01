@@ -7,7 +7,6 @@ using System.Security;
 using System.Security.Cryptography;
 using System.Text;
 using Faithlife.Utility;
-using Faithlife.Utility.Invariant;
 
 namespace Faithlife.OAuth
 {
@@ -101,7 +100,7 @@ namespace Faithlife.OAuth
 		{
 			get
 			{
-				return !m_accessToken.IsNullOrEmpty() && m_accessTokenSecret != null;
+				return !string.IsNullOrEmpty(m_accessToken) && m_accessTokenSecret != null;
 			}
 		}
 
@@ -112,7 +111,7 @@ namespace Faithlife.OAuth
 		{
 			get
 			{
-				return !m_requestToken.IsNullOrEmpty() && !m_requestTokenSecret.IsNullOrEmpty();
+				return !string.IsNullOrEmpty(m_requestToken) && !string.IsNullOrEmpty(m_requestTokenSecret);
 			}
 		}
 
@@ -271,7 +270,7 @@ namespace Faithlife.OAuth
 			return parameters
 				.OrderBy(p => p.Key)
 				.ThenBy(p => p.Value)
-				.ToReadOnlyCollection();
+				.ToList().AsReadOnly();
 		}
 
 		private string GetNormalizedKeyString(bool authorizedRequest)
@@ -315,11 +314,11 @@ namespace Faithlife.OAuth
 
 		private static ReadOnlyCollection<Parameter> GetQueryStringParameters(string query)
 		{
-			if (query.IsNullOrEmpty() || !query.StartsWith("?", StringComparison.OrdinalIgnoreCase))
-				return ListUtility.CreateReadOnlyCollection<Parameter>();
+			if (string.IsNullOrEmpty(query) || !query.StartsWith("?", StringComparison.OrdinalIgnoreCase))
+				return new List<Parameter>().AsReadOnly();
 
 			return GetValues(query.Substring(1)).Select(x => new Parameter(x.Key, x.Value))
-				.ToReadOnlyCollection();
+				.ToList().AsReadOnly();
 		}
 
 		private class Parameter

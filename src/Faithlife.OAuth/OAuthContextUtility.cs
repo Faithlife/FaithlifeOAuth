@@ -69,7 +69,7 @@ namespace Faithlife.OAuth
 		/// </summary>
 		public static ReadOnlyDictionary<string, string> GetParameters(string responseContent)
 		{
-			if (responseContent.IsNullOrEmpty())
+			if (string.IsNullOrEmpty(responseContent))
 				return new Dictionary<string, string>().AsReadOnly();
 
 			return responseContent
@@ -91,7 +91,7 @@ namespace Faithlife.OAuth
 				string token = parameters.GetValueOrDefault(OAuthConstants.Token);
 				string secret = parameters.GetValueOrDefault(OAuthConstants.TokenSecret);
 
-				if (!token.IsNullOrEmpty() && !secret.IsNullOrEmpty())
+				if (!string.IsNullOrEmpty(token) && !string.IsNullOrEmpty(secret))
 				{
 					setTokenAndSecret(token, secret);
 					success = true;
