@@ -1,15 +1,8 @@
 # ignore output folders
 bin/
-build/
 cake/
 obj/
-ipch/
 release/
-tools/
-
-# ignore output files
-OurMessages*.resources
-OurResources*.resources
 
 # ignore user-specific options/cache files
 .vs/
@@ -22,3 +15,5 @@ Thumbs.db
 *.userprefs
 *.ncrunchproject
 *.ncrunchsolution
+nCrunchTemp*
+_ReSharper*
