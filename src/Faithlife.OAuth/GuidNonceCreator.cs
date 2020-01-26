@@ -12,9 +12,6 @@ namespace Faithlife.OAuth
 		/// Creates a new nonce.
 		/// </summary>
 		/// <returns>A new GUID, converted to a string.</returns>
-		public string CreateNonce()
-		{
-			return Guid.NewGuid().ToLowerNoDashString();
-		}
+		public string CreateNonce() => Guid.NewGuid().ToLowerNoDashString();
 	}
 }

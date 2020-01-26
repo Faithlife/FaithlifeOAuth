@@ -125,10 +125,7 @@ namespace Faithlife.OAuth.Tests
 				m_nonce = nonce;
 			}
 
-			public string CreateNonce()
-			{
-				return m_nonce;
-			}
+			public string CreateNonce() => m_nonce;
 
 			readonly string m_nonce;
 		}
@@ -140,10 +137,7 @@ namespace Faithlife.OAuth.Tests
 				m_timestamp = timestamp;
 			}
 
-			public DateTime GetUtcNow()
-			{
-				return DateTimeUtility.FromUnixTimestamp(m_timestamp);
-			}
+			public DateTime GetUtcNow() => DateTimeUtility.FromUnixTimestamp(m_timestamp);
 
 			readonly long m_timestamp;
 		}

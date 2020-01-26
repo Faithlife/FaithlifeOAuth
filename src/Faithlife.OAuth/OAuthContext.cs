@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Net;
-using System.Security;
 using System.Security.Cryptography;
 using System.Text;
 using Faithlife.Utility;
@@ -29,9 +28,9 @@ namespace Faithlife.OAuth
 			if (signatureMethod != OAuthSignatureMethods.HmacSha1)
 				throw new NotSupportedException("Only HMAC-SHA1 is supported at this time");
 
-			m_oauthEndpoint = oauthEndpoint;
-			m_requestTokenHttpMethod = requestTokenHttpMethod;
-			m_requestAccessTokenHttpMethod = requestAccessTokenHttpMethod;
+			OAuthEndpoint = oauthEndpoint;
+			RequestTokenHttpMethod = requestTokenHttpMethod;
+			RequestAccessTokenHttpMethod = requestAccessTokenHttpMethod;
 			m_consumerKey = consumerKey;
 			m_consumerSecret = consumerSecret;
 			m_signatureMethod = signatureMethod;
@@ -40,80 +39,58 @@ namespace Faithlife.OAuth
 		/// <summary>
 		/// Gets the encoding settings.
 		/// </summary>
-		public static UrlEncodingSettings EncodingSettings
+		public static UrlEncodingSettings EncodingSettings { get; } = new UrlEncodingSettings
 		{
-			get { return s_encodingSettings; }
-		}
+			ShouldEncodeChar = ch =>
+				!(ch >= '0' && ch <= '9') &&
+				!(ch >= 'A' && ch <= 'Z') &&
+				!(ch >= 'a' && ch <= 'z') &&
+				!(ch == '-' || ch == '_' || ch == '.' || ch == '~'),
+			EncodedBytePrefixChar = '%',
+			UppercaseHexDigits = true,
+			TextEncoding = Encoding.UTF8,
+			PreventDoubleEncoding = true,
+		};
 
 		/// <summary>
 		/// Gets the OAuth endpoint.
 		/// </summary>
-		public string OAuthEndpoint
-		{
-			get { return m_oauthEndpoint; }
-		}
+		public string OAuthEndpoint { get; }
 
 		/// <summary>
 		/// Gets the request token HTTP method.
 		/// </summary>
-		public string RequestTokenHttpMethod
-		{
-			get { return m_requestTokenHttpMethod; }
-		}
+		public string RequestTokenHttpMethod { get; }
 
 		/// <summary>
 		/// Gets the request access token HTTP method.
 		/// </summary>
-		public string RequestAccessTokenHttpMethod
-		{
-			get { return m_requestAccessTokenHttpMethod; }
-		}
+		public string RequestAccessTokenHttpMethod { get; }
 
 		/// <summary>
 		/// Gets the access token.
 		/// </summary>
-		public string? AccessToken
-		{
-			get { return m_accessToken; }
-		}
+		public string? AccessToken { get; private set; }
 
 		/// <summary>
 		/// Gets the request token.
 		/// </summary>
-		public string? RequestToken
-		{
-			get { return m_requestToken; }
-		}
+		public string? RequestToken { get; private set; }
 
 		/// <summary>
 		/// Gets the access token secret.
 		/// </summary>
-		public string? AccessTokenSecret
-		{
-			get { return m_accessTokenSecret; }
-		}
+		public string? AccessTokenSecret { get; private set; }
 
 		/// <summary>
 		/// Gets a value indicating if authorization has already occurred.
 		/// </summary>
-		public bool IsAuthorized
-		{
-			get
-			{
-				return !string.IsNullOrEmpty(m_accessToken) && m_accessTokenSecret != null;
-			}
-		}
+		public bool IsAuthorized => !string.IsNullOrEmpty(AccessToken) && AccessTokenSecret is object;
 
 		/// <summary>
 		/// Returns a value indicating if request token is present.
 		/// </summary>
-		public bool HasRequestToken
-		{
-			get
-			{
-				return !string.IsNullOrEmpty(m_requestToken) && !string.IsNullOrEmpty(m_requestTokenSecret);
-			}
-		}
+		public bool HasRequestToken => !string.IsNullOrEmpty(RequestToken) && !string.IsNullOrEmpty(RequestTokenSecret);
 
 		/// <summary>
 		/// Gets a uri for authorizing the user.
@@ -121,9 +98,9 @@ namespace Faithlife.OAuth
 		public Uri GetUriForAuthorization()
 		{
 			if (HasRequestToken)
-				return new Uri("{0}/{1}?{2}={3}".FormatInvariant(m_oauthEndpoint, OAuthConstants.AuthorizeRelativeUrl, Encode(OAuthConstants.Token), Encode(m_requestToken)));
+				return new Uri("{0}/{1}?{2}={3}".FormatInvariant(OAuthEndpoint, OAuthConstants.AuthorizeRelativeUrl, Encode(OAuthConstants.Token), Encode(RequestToken)));
 
-			return new Uri(m_oauthEndpoint);
+			return new Uri(OAuthEndpoint);
 		}
 
 		/// <summary>
@@ -131,10 +108,10 @@ namespace Faithlife.OAuth
 		/// </summary>
 		/// <param name="requestToken">The request token.</param>
 		/// <param name="requestTokenSecret">The token secret.</param>
-		public void SetRequestTokenAndSecret(string requestToken, string requestTokenSecret)
+		public void SetRequestTokenAndSecret(string? requestToken, string? requestTokenSecret)
 		{
-			m_requestToken = requestToken;
-			m_requestTokenSecret = requestTokenSecret;
+			RequestToken = requestToken;
+			RequestTokenSecret = requestTokenSecret;
 		}
 
 		/// <summary>
@@ -142,10 +119,10 @@ namespace Faithlife.OAuth
 		/// </summary>
 		/// <param name="accessToken">The access token.</param>
 		/// <param name="accessSecret">The access secret.</param>
-		public void SetAccessTokenAndSecret(string accessToken, string accessSecret)
+		public void SetAccessTokenAndSecret(string? accessToken, string? accessSecret)
 		{
-			m_accessToken = accessToken;
-			m_accessTokenSecret = accessSecret;
+			AccessToken = accessToken;
+			AccessTokenSecret = accessSecret;
 		}
 
 		/// <summary>
@@ -153,10 +130,10 @@ namespace Faithlife.OAuth
 		/// </summary>
 		public void ClearCredentials()
 		{
-			m_requestToken = null;
-			m_requestTokenSecret = null;
-			m_accessToken = null;
-			m_accessTokenSecret = null;
+			RequestToken = null;
+			RequestTokenSecret = null;
+			AccessToken = null;
+			AccessTokenSecret = null;
 
 			ClearAccessCredentialsCore();
 		}
@@ -168,10 +145,8 @@ namespace Faithlife.OAuth
 		/// <param name="url">The request URL.</param>
 		/// <param name="authorizedRequest">if set to <c>true</c> the request is authorized.</param>
 		/// <param name="parameters">Optional header parameters.</param>
-		public WebHeaderCollection GetAuthorizationHeader(string requestMethod, string url, bool authorizedRequest, params string[] parameters)
-		{
-			return GetAuthorizationHeader(requestMethod, new Uri(url), authorizedRequest, parameters);
-		}
+		public WebHeaderCollection GetAuthorizationHeader(string requestMethod, string url, bool authorizedRequest, params string[] parameters) =>
+			GetAuthorizationHeader(requestMethod, new Uri(url), authorizedRequest, parameters);
 
 		/// <summary>
 		/// Gets the OAuth authorization header.
@@ -182,33 +157,32 @@ namespace Faithlife.OAuth
 		/// <param name="parameters">Optional header parameters.</param>
 		public WebHeaderCollection GetAuthorizationHeader(string requestMethod, Uri uri, bool authorizedRequest, params string[] parameters)
 		{
-			int stringCount = parameters.Length;
+			var stringCount = parameters.Length;
 			if (stringCount % 2 == 1)
 				throw new ArgumentException("The number of strings must be even.");
 
-			List<Parameter> additionalParameters = new List<Parameter>();
+			var additionalParameters = new List<Parameter>();
 			if (authorizedRequest)
-				additionalParameters.Add(new Parameter(OAuthConstants.Token, m_accessToken) { IsEncoded = true });
+				additionalParameters.Add(new Parameter(OAuthConstants.Token, AccessToken) { IsEncoded = true });
 
-			for (int stringIndex = 0; stringIndex < stringCount; stringIndex += 2)
+			for (var stringIndex = 0; stringIndex < stringCount; stringIndex += 2)
 				additionalParameters.Add(new Parameter(parameters[stringIndex], parameters[stringIndex + 1]) { IsEncoded = true });
 
-			List<Parameter> headerParameters = GetDefaultParametersForSignature()
-				.Concat(additionalParameters)
-				.ToList();
+			var headerParameters = GetDefaultParametersForSignature().Concat(additionalParameters).ToList();
 
 			// create signature
-			string signature = CreateSignature(requestMethod, uri, authorizedRequest, SortParameters(headerParameters.Concat(GetQueryStringParameters(uri.Query))));
+			var signature = CreateSignature(requestMethod, uri, authorizedRequest, SortParameters(headerParameters.Concat(GetQueryStringParameters(uri.Query))));
 			headerParameters.Add(new Parameter(OAuthConstants.Signature, signature));
 
 			// then add signature to header parameters
-			string headerStringValue = SortParameters(headerParameters)
+			var headerStringValue = SortParameters(headerParameters)
 				.Select(p => "{0}=\"{1}\"".FormatInvariant(Encode(p.Key), Encode(p.Value, !p.IsEncoded)))
 				.Join(",");
 
-			WebHeaderCollection headers = new WebHeaderCollection();
-			headers[HttpRequestHeader.Authorization] = "{0} {1}".FormatInvariant(OAuthConstants.HeaderPrefix, headerStringValue);
-			return headers;
+			return new WebHeaderCollection
+			{
+				[HttpRequestHeader.Authorization] = "{0} {1}".FormatInvariant(OAuthConstants.HeaderPrefix, headerStringValue)
+			};
 		}
 
 		/// <summary>
@@ -216,10 +190,8 @@ namespace Faithlife.OAuth
 		/// </summary>
 		/// <param name="valuesString">The string.</param>
 		/// <returns>The dictionary.</returns>
-		protected static Dictionary<string, string> GetValues(string valuesString)
-		{
-			return valuesString.Split('&').Select(str => str.Split('=')).ToDictionary(kvp => kvp[0], kvp => kvp[1]);
-		}
+		protected static Dictionary<string, string> GetValues(string valuesString) =>
+			valuesString.Split('&').Select(str => str.Split('=')).ToDictionary(kvp => kvp[0], kvp => kvp[1]);
 
 		/// <summary>
 		/// Allows derived classes to remove any extra credentials.
@@ -228,24 +200,24 @@ namespace Faithlife.OAuth
 		{
 		}
 
+		private string? RequestTokenSecret { get; set; }
+
 		private string CreateSignature(string requestMethod, Uri uri, bool authorizedRequest, IEnumerable<Parameter> parameters)
 		{
 			if (m_signatureMethod != OAuthSignatureMethods.HmacSha1)
-				return string.Empty;
+				return "";
 
-			byte[] key = Encoding.UTF8.GetBytes(GetNormalizedKeyString(authorizedRequest));
-			using (HMACSHA1 hashAlgorithm = new HMACSHA1(key))
-			{
-				byte[] dataBytes = Encoding.UTF8.GetBytes(CreateSignatureBase(requestMethod, uri, parameters));
-				byte[] hashBytes = hashAlgorithm.ComputeHash(dataBytes);
+			var key = Encoding.UTF8.GetBytes(GetNormalizedKeyString(authorizedRequest));
+			using var hashAlgorithm = new HMACSHA1(key);
+			var dataBytes = Encoding.UTF8.GetBytes(CreateSignatureBase(requestMethod, uri, parameters));
+			var hashBytes = hashAlgorithm.ComputeHash(dataBytes);
 
-				return Convert.ToBase64String(hashBytes);
-			}
+			return Convert.ToBase64String(hashBytes);
 		}
 
 		private static string CreateSignatureBase(string requestMethod, Uri uri, IEnumerable<Parameter> parameters)
 		{
-			StringBuilder builder = new StringBuilder();
+			var builder = new StringBuilder();
 			builder.AppendFormat("{0}&", requestMethod.ToUpperInvariant());
 			builder.AppendFormat("{0}&", GetNormalizedUrl(uri));
 			builder.Append(GetNormalizedParameters(parameters));
@@ -253,9 +225,7 @@ namespace Faithlife.OAuth
 			return builder.ToString();
 		}
 
-		private IEnumerable<Parameter> GetDefaultParametersForSignature()
-		{
-			return new List<Parameter>
+		private IEnumerable<Parameter> GetDefaultParametersForSignature() => new List<Parameter>
 			{
 				new Parameter(OAuthConstants.ConsumerKey, m_consumerKey),
 				new Parameter(OAuthConstants.Nonce, Guid.NewGuid().ToString()),
@@ -263,24 +233,19 @@ namespace Faithlife.OAuth
 				new Parameter(OAuthConstants.Version, OAuthConstants.OAuthVersion),
 				new Parameter(OAuthConstants.SignatureMethod, m_signatureMethod),
 			};
-		}
 
-		private ReadOnlyCollection<Parameter> SortParameters(IEnumerable<Parameter> parameters)
-		{
-			return parameters
+		private ReadOnlyCollection<Parameter> SortParameters(IEnumerable<Parameter> parameters) =>
+			parameters
 				.OrderBy(p => p.Key)
 				.ThenBy(p => p.Value)
 				.ToList().AsReadOnly();
-		}
 
-		private string GetNormalizedKeyString(bool authorizedRequest)
-		{
-			return "{0}&{1}".FormatInvariant(Encode(m_consumerSecret), authorizedRequest ? m_accessTokenSecret : m_requestTokenSecret);
-		}
+		private string GetNormalizedKeyString(bool authorizedRequest) =>
+			"{0}&{1}".FormatInvariant(Encode(m_consumerSecret), authorizedRequest ? AccessTokenSecret : RequestTokenSecret);
 
 		private static string GetNormalizedUrl(Uri uri)
 		{
-			StringBuilder normalizedUriBuilder = new StringBuilder();
+			var normalizedUriBuilder = new StringBuilder();
 			normalizedUriBuilder.Append(uri.Scheme);
 			normalizedUriBuilder.Append("://");
 			normalizedUriBuilder.Append(uri.Authority.ToLowerInvariant());
@@ -289,28 +254,18 @@ namespace Faithlife.OAuth
 			return Encode(normalizedUriBuilder.ToString())!; // TODO: Update Faithlife.Utility
 		}
 
-		private static string GetNormalizedParameters(IEnumerable<Parameter> parameters)
-		{
-			return Encode(parameters.Select(p => "{0}={1}".FormatInvariant(p.Key, p.Value)).Join("&"))!; // TODO: Update Faithlife.Utility
-		}
+		private static string GetNormalizedParameters(IEnumerable<Parameter> parameters) =>
+			Encode(parameters.Select(p => "{0}={1}".FormatInvariant(p.Key, p.Value)).Join("&"))!; // TODO: Update Faithlife.Utility
 
 		/// <summary>
 		/// Gets the time elapsed since 1/1/1970 in seconds.
 		/// </summary>
-		private static long GetTimestamp()
-		{
-			return DateTimeUtility.ToUnixTimestamp(DateTime.UtcNow);
-		}
+		private static long GetTimestamp() => DateTimeUtility.ToUnixTimestamp(DateTime.UtcNow);
 
-		private static string? Encode(string? str)
-		{
-			return Encode(str, true);
-		}
+		private static string? Encode(string? str) => Encode(str, true);
 
-		private static string? Encode(string? str, bool encode)
-		{
-			return encode ? UrlEncoding.Encode(str, s_encodingSettings) : str;
-		}
+		private static string? Encode(string? str, bool encode) =>
+			encode ? UrlEncoding.Encode(str, EncodingSettings) : str;
 
 		private static ReadOnlyCollection<Parameter> GetQueryStringParameters(string query)
 		{
@@ -336,29 +291,8 @@ namespace Faithlife.OAuth
 			public bool IsEncoded { get; set; }
 		}
 
-		static readonly UrlEncodingSettings s_encodingSettings = new UrlEncodingSettings
-		{
-			ShouldEncodeChar = ch =>
-				!(ch >= '0' && ch <= '9') &&
-				!(ch >= 'A' && ch <= 'Z') &&
-				!(ch >= 'a' && ch <= 'z') &&
-				!(ch == '-' || ch == '_' || ch == '.' || ch == '~'),
-			EncodedBytePrefixChar = '%',
-			UppercaseHexDigits = true,
-			TextEncoding = Encoding.UTF8,
-			PreventDoubleEncoding = true,
-		};
-
-		readonly string m_oauthEndpoint;
-		readonly string m_requestTokenHttpMethod;
-		readonly string m_requestAccessTokenHttpMethod;
-
 		readonly string m_consumerKey;
 		readonly string m_consumerSecret;
 		readonly string m_signatureMethod;
-		string? m_requestToken;
-		string? m_requestTokenSecret;
-		string? m_accessToken;
-		string? m_accessTokenSecret;
 	}
 }

@@ -11,9 +11,6 @@ namespace Faithlife.OAuth
 		/// Gets the current UTC time.
 		/// </summary>
 		/// <returns>A <see cref="DateTime"/> whose value is the current UTC date and time.</returns>
-		public DateTime GetUtcNow()
-		{
-			return DateTime.UtcNow;
-		}
+		public DateTime GetUtcNow() => DateTime.UtcNow;
 	}
 }

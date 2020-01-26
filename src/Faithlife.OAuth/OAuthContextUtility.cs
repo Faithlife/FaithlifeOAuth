@@ -17,20 +17,16 @@ namespace Faithlife.OAuth
 		/// </summary>
 		/// <param name="context">The OAuth context.</param>
 		/// <param name="httpResponseStream">The HTTP response stream.</param>
-		public static bool TrySetUnauthorizedRequestValues(OAuthContext context, Stream httpResponseStream)
-		{
-			return TrySetTokenAndSecret(httpResponseStream, context.SetRequestTokenAndSecret);
-		}
+		public static bool TrySetUnauthorizedRequestValues(OAuthContext context, Stream httpResponseStream) =>
+			TrySetTokenAndSecret(httpResponseStream, context.SetRequestTokenAndSecret);
 
 		/// <summary>
 		/// Tries to set the access token and token secret values from the specified HTTP response.
 		/// </summary>
 		/// <param name="context">The OAuth context.</param>
 		/// <param name="httpResponseStream">The HTTP response stream.</param>
-		public static bool TrySetAccessTokenValues(OAuthContext context, Stream httpResponseStream)
-		{
-			return TrySetTokenAndSecret(httpResponseStream, (token, secret) => context.SetAccessTokenAndSecret(token, secret));
-		}
+		public static bool TrySetAccessTokenValues(OAuthContext context, Stream httpResponseStream) =>
+			TrySetTokenAndSecret(httpResponseStream, (token, secret) => context.SetAccessTokenAndSecret(token, secret));
 
 		/// <summary>
 		/// Tries to get the acess token request header parameters.
@@ -40,17 +36,17 @@ namespace Faithlife.OAuth
 		/// <param name="headerParameters">The header parameters.</param>
 		public static bool TryGetAcessTokenRequestHeaderParameters(OAuthContext context, Uri uri, out string[]? headerParameters)
 		{
-			if (context == null)
-				throw new ArgumentNullException("context");
-			if (uri == null)
-				throw new ArgumentNullException("uri");
+			if (context is null)
+				throw new ArgumentNullException(nameof(context));
+			if (uri is null)
+				throw new ArgumentNullException(nameof(uri));
 
 			headerParameters = null;
 
 			if (!context.HasRequestToken)
 				return false;
 
-			ReadOnlyDictionary<string, string> parameters = GetParameters(uri.Query);
+			var parameters = GetParameters(uri.Query);
 
 			if (!parameters.ContainsKey(OAuthConstants.Verifier))
 				return false;
@@ -81,24 +77,22 @@ namespace Faithlife.OAuth
 
 		private static bool TrySetTokenAndSecret(Stream httpResponseStream, Action<string, string> setTokenAndSecret)
 		{
-			bool success = false;
+			var success = false;
 
-			using (StreamReader streamReader = new StreamReader(httpResponseStream))
+			using var streamReader = new StreamReader(httpResponseStream);
+			var responseString = streamReader.ReadToEnd();
+			var parameters = GetParameters(responseString);
+
+			var token = parameters.GetValueOrDefault(OAuthConstants.Token);
+			var secret = parameters.GetValueOrDefault(OAuthConstants.TokenSecret);
+
+			if (!string.IsNullOrEmpty(token) && !string.IsNullOrEmpty(secret))
 			{
-				string responseString = streamReader.ReadToEnd();
-				ReadOnlyDictionary<string, string> parameters = GetParameters(responseString);
-
-				string token = parameters.GetValueOrDefault(OAuthConstants.Token);
-				string secret = parameters.GetValueOrDefault(OAuthConstants.TokenSecret);
-
-				if (!string.IsNullOrEmpty(token) && !string.IsNullOrEmpty(secret))
-				{
-					setTokenAndSecret(token, secret);
-					success = true;
-				}
-
-				return success;
+				setTokenAndSecret(token, secret);
+				success = true;
 			}
+
+			return success;
 		}
 	}
 }
