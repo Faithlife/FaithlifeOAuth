@@ -72,7 +72,7 @@ namespace Faithlife.OAuth
 		/// <summary>
 		/// Gets the access token.
 		/// </summary>
-		public string AccessToken
+		public string? AccessToken
 		{
 			get { return m_accessToken; }
 		}
@@ -80,7 +80,7 @@ namespace Faithlife.OAuth
 		/// <summary>
 		/// Gets the request token.
 		/// </summary>
-		public string RequestToken
+		public string? RequestToken
 		{
 			get { return m_requestToken; }
 		}
@@ -88,7 +88,7 @@ namespace Faithlife.OAuth
 		/// <summary>
 		/// Gets the access token secret.
 		/// </summary>
-		public string AccessTokenSecret
+		public string? AccessTokenSecret
 		{
 			get { return m_accessTokenSecret; }
 		}
@@ -286,12 +286,12 @@ namespace Faithlife.OAuth
 			normalizedUriBuilder.Append(uri.Authority.ToLowerInvariant());
 			normalizedUriBuilder.Append(uri.AbsolutePath);
 
-			return Encode(normalizedUriBuilder.ToString());
+			return Encode(normalizedUriBuilder.ToString())!; // TODO: Update Faithlife.Utility
 		}
 
 		private static string GetNormalizedParameters(IEnumerable<Parameter> parameters)
 		{
-			return Encode(parameters.Select(p => "{0}={1}".FormatInvariant(p.Key, p.Value)).Join("&"));
+			return Encode(parameters.Select(p => "{0}={1}".FormatInvariant(p.Key, p.Value)).Join("&"))!; // TODO: Update Faithlife.Utility
 		}
 
 		/// <summary>
@@ -302,12 +302,12 @@ namespace Faithlife.OAuth
 			return DateTimeUtility.ToUnixTimestamp(DateTime.UtcNow);
 		}
 
-		private static string Encode(string str)
+		private static string? Encode(string? str)
 		{
 			return Encode(str, true);
 		}
 
-		private static string Encode(string str, bool encode)
+		private static string? Encode(string? str, bool encode)
 		{
 			return encode ? UrlEncoding.Encode(str, s_encodingSettings) : str;
 		}
@@ -323,15 +323,15 @@ namespace Faithlife.OAuth
 
 		private class Parameter
 		{
-			public Parameter(string key, string value)
+			public Parameter(string key, string? value)
 			{
 				Key = key;
 				Value = value;
 			}
 
-			public string Key { get; private set; }
+			public string Key { get; }
 
-			public string Value { get; private set; }
+			public string? Value { get; }
 
 			public bool IsEncoded { get; set; }
 		}
@@ -356,9 +356,9 @@ namespace Faithlife.OAuth
 		readonly string m_consumerKey;
 		readonly string m_consumerSecret;
 		readonly string m_signatureMethod;
-		string m_requestToken;
-		string m_requestTokenSecret;
-		string m_accessToken;
-		string m_accessTokenSecret;
+		string? m_requestToken;
+		string? m_requestTokenSecret;
+		string? m_accessToken;
+		string? m_accessTokenSecret;
 	}
 }

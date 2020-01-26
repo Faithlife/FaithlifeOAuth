@@ -110,8 +110,7 @@ namespace Faithlife.OAuth.Tests
 
 			foreach (var expected in ToPairs(expectedKeysAndValues))
 			{
-				string value;
-				Assert.IsTrue(parameters.TryGetValue(expected.Key, out value));
+				Assert.IsTrue(parameters.TryGetValue(expected.Key, out var value));
 				Assert.AreEqual("\"" + OAuthUtility.PercentEncode(expected.Value) + "\"", value);
 				parameters.Remove(expected.Key);
 			}

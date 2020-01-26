@@ -38,7 +38,7 @@ namespace Faithlife.OAuth
 		/// <param name="context">The context.</param>
 		/// <param name="uri">The URI.</param>
 		/// <param name="headerParameters">The header parameters.</param>
-		public static bool TryGetAcessTokenRequestHeaderParameters(OAuthContext context, Uri uri, out string[] headerParameters)
+		public static bool TryGetAcessTokenRequestHeaderParameters(OAuthContext context, Uri uri, out string[]? headerParameters)
 		{
 			if (context == null)
 				throw new ArgumentNullException("context");
@@ -55,9 +55,9 @@ namespace Faithlife.OAuth
 			if (!parameters.ContainsKey(OAuthConstants.Verifier))
 				return false;
 
-			headerParameters = new[]
+			headerParameters = new string[]
 			{
-				OAuthConstants.Token, context.RequestToken,
+				OAuthConstants.Token, context.RequestToken!,
 				OAuthConstants.Verifier, parameters[OAuthConstants.Verifier]
 			};
 

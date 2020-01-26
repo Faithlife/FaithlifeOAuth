@@ -15,7 +15,7 @@ namespace Faithlife.OAuth
 		/// <summary>
 		/// Create OAuth signature using the PLAINTEXT signature method.
 		/// </summary>
-		public static string CreatePlainTextSignature(string consumerSecret, string tokenSecret)
+		public static string CreatePlainTextSignature(string consumerSecret, string? tokenSecret)
 		{
 			return PercentEncode(consumerSecret) + "&" + PercentEncode(tokenSecret);
 		}
@@ -131,7 +131,7 @@ namespace Faithlife.OAuth
 		/// <summary>
 		/// Create OAuth authentication header using the HMACSHA1 signature method.
 		/// </summary>
-		public static string CreateHmacSha1AuthorizationHeaderValue(Uri uri, string httpMethod, string consumerToken, string consumerSecret, INonceCreator nonceCreator = null, ISystemTime systemTime = null)
+		public static string CreateHmacSha1AuthorizationHeaderValue(Uri uri, string httpMethod, string consumerToken, string consumerSecret, INonceCreator? nonceCreator = null, ISystemTime? systemTime = null)
 		{
 			return CreateHmacSha1AuthorizationHeaderValue(uri, httpMethod, consumerSecret, null, GetHmacSha1Parameters(consumerToken, nonceCreator ?? s_nonceCreator, systemTime ?? s_systemTime));
 		}
@@ -139,7 +139,7 @@ namespace Faithlife.OAuth
 		/// <summary>
 		/// Create OAuth authentication header using the HMACSHA1 signature method.
 		/// </summary>
-		public static string CreateHmacSha1AuthorizationHeaderValue(Uri uri, string httpMethod, string consumerToken, string consumerSecret, string callback, INonceCreator nonceCreator = null, ISystemTime systemTime = null)
+		public static string CreateHmacSha1AuthorizationHeaderValue(Uri uri, string httpMethod, string consumerToken, string consumerSecret, string callback, INonceCreator? nonceCreator = null, ISystemTime? systemTime = null)
 		{
 			return CreateHmacSha1AuthorizationHeaderValue(uri, httpMethod, consumerSecret, null, GetHmacSha1Parameters(consumerToken, nonceCreator ?? s_nonceCreator, systemTime ?? s_systemTime, new Dictionary<string, string> { { OAuthConstants.Callback, callback } }));
 		}
@@ -147,7 +147,7 @@ namespace Faithlife.OAuth
 		/// <summary>
 		/// Create OAuth authentication header using the HMACSHA1 signature method.
 		/// </summary>
-		public static string CreateHmacSha1AuthorizationHeaderValue(Uri uri, string httpMethod, string consumerToken, string consumerSecret, string temporaryToken, string temporarySecret, string verifier, INonceCreator nonceCreator = null, ISystemTime systemTime = null)
+		public static string CreateHmacSha1AuthorizationHeaderValue(Uri uri, string httpMethod, string consumerToken, string consumerSecret, string temporaryToken, string temporarySecret, string verifier, INonceCreator? nonceCreator = null, ISystemTime? systemTime = null)
 		{
 			return CreateHmacSha1AuthorizationHeaderValue(uri, httpMethod, consumerSecret, temporarySecret, GetHmacSha1Parameters(consumerToken, nonceCreator ?? s_nonceCreator, systemTime ?? s_systemTime, new Dictionary<string, string> { { OAuthConstants.Token, temporaryToken }, { OAuthConstants.Verifier, verifier } }));
 		}
@@ -155,7 +155,7 @@ namespace Faithlife.OAuth
 		/// <summary>
 		/// Create OAuth authentication header using the HMACSHA1 signature method.
 		/// </summary>
-		public static string CreateHmacSha1AuthorizationHeaderValue(Uri uri, string httpMethod, string consumerToken, string consumerSecret, string accessToken, string accessSecret, INonceCreator nonceCreator = null, ISystemTime systemTime = null)
+		public static string CreateHmacSha1AuthorizationHeaderValue(Uri uri, string httpMethod, string consumerToken, string consumerSecret, string accessToken, string accessSecret, INonceCreator? nonceCreator = null, ISystemTime? systemTime = null)
 		{
 			return CreateHmacSha1AuthorizationHeaderValue(uri, httpMethod, consumerSecret, accessSecret, GetHmacSha1Parameters(consumerToken, nonceCreator ?? s_nonceCreator, systemTime ?? s_systemTime, new Dictionary<string, string> { { OAuthConstants.Token, accessToken } }));
 		}
@@ -163,7 +163,7 @@ namespace Faithlife.OAuth
 		/// <summary>
 		/// Encode string per OAuth spec (see http://oauth.net/core/1.0/ section 5.1).
 		/// </summary>
-		internal static string PercentEncode(string value)
+		internal static string PercentEncode(string? value)
 		{
 			if (value == null)
 				return "";
@@ -182,7 +182,7 @@ namespace Faithlife.OAuth
 			return builder.ToString();
 		}
 
-		internal static string CreateHmacSha1Signature(string signatureBase, string consumerSecret, string tokenSecret)
+		internal static string CreateHmacSha1Signature(string signatureBase, string consumerSecret, string? tokenSecret)
 		{
 			using (HMACSHA1 hmacsha1 = new HMACSHA1(Encoding.UTF8.GetBytes(CreatePlainTextSignature(consumerSecret, tokenSecret))))
 				return Convert.ToBase64String(hmacsha1.ComputeHash(Encoding.UTF8.GetBytes(signatureBase)));
@@ -227,7 +227,7 @@ namespace Faithlife.OAuth
 				.Join(",");
 		}
 
-		private static string CreateHmacSha1AuthorizationHeaderValue(Uri uri, string httpMethod, string consumerSecret, string tokenSecret, ICollection<KeyValuePair<string, string>> parameters)
+		private static string CreateHmacSha1AuthorizationHeaderValue(Uri uri, string httpMethod, string consumerSecret, string? tokenSecret, ICollection<KeyValuePair<string, string>> parameters)
 		{
 			string newUri;
 			string signatureBase = CreateSignatureBase(uri, httpMethod, parameters, out newUri);
@@ -240,18 +240,18 @@ namespace Faithlife.OAuth
 				.Join(",");
 		}
 
-		private static string CreateHmacSha1Signature(Uri uri, string httpMethod, string consumerSecret, string tokenSecret, ICollection<KeyValuePair<string, string>> parameters)
+		private static string CreateHmacSha1Signature(Uri uri, string httpMethod, string consumerSecret, string? tokenSecret, ICollection<KeyValuePair<string, string>> parameters)
 		{
 			string newUri;
 			return CreateHmacSha1Signature(CreateSignatureBase(uri, httpMethod, parameters, out newUri), consumerSecret, tokenSecret);
 		}
 
-		private static ICollection<KeyValuePair<string, string>> GetHmacSha1Parameters(string consumerToken, INonceCreator nonceCreator, ISystemTime systemTime, Dictionary<string, string> additionalParameters = null)
+		private static ICollection<KeyValuePair<string, string>> GetHmacSha1Parameters(string consumerToken, INonceCreator nonceCreator, ISystemTime systemTime, Dictionary<string, string>? additionalParameters = null)
 		{
 			return GetHmacSha1Parameters(consumerToken, nonceCreator.CreateNonce(), DateTimeUtility.ToUnixTimestamp(systemTime.GetUtcNow()).ToInvariantString(), additionalParameters);
 		}
 
-		private static ICollection<KeyValuePair<string, string>> GetHmacSha1Parameters(string consumerToken, string nonce, string timeStamp, Dictionary<string, string> additionalParameters = null)
+		private static ICollection<KeyValuePair<string, string>> GetHmacSha1Parameters(string consumerToken, string nonce, string timeStamp, Dictionary<string, string>? additionalParameters = null)
 		{
 			return new Dictionary<string, string>
 			{
