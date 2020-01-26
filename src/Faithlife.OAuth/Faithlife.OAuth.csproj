@@ -1,11 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <VersionPrefix>0.3.0</VersionPrefix>
     <TargetFrameworks>netstandard2.0;net472</TargetFrameworks>
     <FrameworkPathOverride Condition="'$(TargetFramework)' == 'net472' and '$(MONO_ROOT)' != ''">$(MONO_ROOT)/lib/mono/4.7.2-api/</FrameworkPathOverride>
-    <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
-    <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\$(AssemblyName).xml</DocumentationFile>
     <Description>Generates OAuth 1.0a signatures</Description>
+    <PackageTags></PackageTags>
+    <IsPackable>true</IsPackable>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Faithlife.Utility" Version="0.8.0" />
