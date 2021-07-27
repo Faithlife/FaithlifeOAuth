@@ -129,6 +129,9 @@ namespace Faithlife.OAuth
 			(value >= '0' && value <= '9') || (value >= 'A' && value <= 'Z') || (value >= 'a' && value <= 'z') || s_unencodedPunctuation.Contains(value);
 
 		private static KeyValuePair<string, string> NewKeyValuePair(string key, string value) => new KeyValuePair<string, string>(key, value);
+		
+		public static bool IsNullOrEmpty(this string? str) => string.IsNullOrEmpty(str);
+		public static bool IsNullOrWhiteSpace(this string? str) => string.IsNullOrWhiteSpace(str);
 
 		static readonly INonceCreator s_nonceCreator = new GuidNonceCreator();
 		static readonly ISystemTime s_systemTime = new StandardSystemTime();
