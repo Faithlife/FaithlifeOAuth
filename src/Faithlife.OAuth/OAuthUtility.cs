@@ -10,7 +10,7 @@ namespace Faithlife.OAuth
 	/// <summary>
 	/// Utility code for OAuth authentication.
 	/// </summary>
-	public static partial class OAuthUtility
+	public static class OAuthUtility
 	{
 		/// <summary>
 		/// Create OAuth signature using the PLAINTEXT signature method.
