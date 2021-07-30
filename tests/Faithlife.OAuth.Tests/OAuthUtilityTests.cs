@@ -51,10 +51,9 @@ namespace Faithlife.OAuth.Tests
 		[TestCase("GET&http%3A%2F%2Fphotos.example.net%2Fphotos&file%3Dvacation.jpg%26oauth_consumer_key%3Ddpf43f3p2l4k3l03%26oauth_nonce%3DchapoH%26oauth_signature_method%3DHMAC-SHA1%26oauth_timestamp%3D137131202%26oauth_token%3Dnnch734d00sl2jdk%26size%3Doriginal",
 			"MdpQcU8iPSUjWoN/UDMsK2sui9I=", "http://photos.example.net/photos?file=vacation.jpg&size=original", "GET", "kd94hf93k423kf44", "pfkkdhi9sl3r4s00",
 			"oauth_consumer_key", "dpf43f3p2l4k3l03", "oauth_nonce", "chapoH", "oauth_signature_method", "HMAC-SHA1", "oauth_timestamp", "137131202", "oauth_token", "nnch734d00sl2jdk", Description = "RFC 5849, section 1.2")]
-		public void CreateSignature(string expectedSignatureBase, string expectedSignature, string uri, string httpMethod, string consumerSecret, string tokenSecret, params string[] parameters)
+		public void CreateHmacSha1Signature(string expectedSignatureBase, string expectedSignature, string uri, string httpMethod, string consumerSecret, string tokenSecret, params string[] parameters)
 		{
-			string newUri;
-			string signatureBase = OAuthUtility.CreateSignatureBase(new Uri(uri), httpMethod, ToPairs(parameters).ToList(), out newUri);
+			var signatureBase = OAuthUtility.CreateSignatureBase(new Uri(uri), httpMethod, ToPairs(parameters).ToList(), out _);
 			Assert.AreEqual(expectedSignatureBase, signatureBase);
 
 			Assert.AreEqual(expectedSignature, OAuthUtility.CreateHmacSha1Signature(signatureBase, consumerSecret, tokenSecret));
@@ -79,6 +78,53 @@ namespace Faithlife.OAuth.Tests
 			TestSystemTime systemTime = new TestSystemTime(timestamp);
 
 			string header = OAuthUtility.CreateHmacSha1AuthorizationHeaderValue(new Uri(uri), httpMethod, consumerToken, consumerSecret, callback, nonceCreator, systemTime);
+			Assert.AreEqual(expectedHeader, header);
+		}
+
+		[TestCase("POST&https%3A%2F%2Fapi.twitter.com%2Foauth%2Frequest_token&oauth_callback%3Dhttp%253A%252F%252Flocalhost%253A3005%252Fthe_dance%252Fprocess_callback%253Fservice_provider_id%253D11%26oauth_consumer_key%3DGDdmIQH6jhtmLUypg82g%26oauth_nonce%3DQP70eNmVz8jvdPevU3oJD2AfF7R7odC2XJcn4XlZJqk%26oauth_signature_method%3DHMAC-SHA256%26oauth_timestamp%3D1272323042%26oauth_version%3D1.0",
+			"N0KBpiPbuPIMx2B77eIg7tNfGNF81iq3bcO9RO6lH+k=", "https://api.twitter.com/oauth/request_token", "POST", "MCD8BKwGdgPHvAuvgvz4EQpqDAtx89grbuNMRd7Eh98", null,
+			"oauth_consumer_key", "GDdmIQH6jhtmLUypg82g", "oauth_signature_method", "HMAC-SHA256", "oauth_timestamp", "1272323042", "oauth_version", "1.0", "oauth_nonce", "QP70eNmVz8jvdPevU3oJD2AfF7R7odC2XJcn4XlZJqk", "oauth_callback", "http://localhost:3005/the_dance/process_callback?service_provider_id=11",
+			Description = "From https://github.com/request/oauth-sign/blob/18a2513da6ba7a2c0cd8179170d7c296c7625137/test.js")]
+		[TestCase("POST&https%3A%2F%2Fapi.twitter.com%2Foauth%2Faccess_token&oauth_consumer_key%3DGDdmIQH6jhtmLUypg82g%26oauth_nonce%3D9zWH6qe0qG7Lc1telCn7FhUbLyVdjEaL3MO5uHxn8%26oauth_signature_method%3DHMAC-SHA256%26oauth_timestamp%3D1272323047%26oauth_token%3D8ldIZyxQeVrFZXFOZH5tAwj6vzJYuLQpl0WUEYtWc%26oauth_verifier%3DpDNg57prOHapMbhv25RNf75lVRd6JDsni1AJJIDYoTY%26oauth_version%3D1.0",
+			"y7S9eUhA0tC9/YfRzCPqkg3/bUdYRDpZ93Xi51AvhjQ=", "https://api.twitter.com/oauth/access_token", "POST", "MCD8BKwGdgPHvAuvgvz4EQpqDAtx89grbuNMRd7Eh98", "x6qpRnlEmW9JbQn4PQVVeVG8ZLPEx6A0TOebgwcuA",
+			"oauth_consumer_key", "GDdmIQH6jhtmLUypg82g", "oauth_signature_method", "HMAC-SHA256", "oauth_token", "8ldIZyxQeVrFZXFOZH5tAwj6vzJYuLQpl0WUEYtWc", "oauth_timestamp", "1272323047", "oauth_version", "1.0", "oauth_nonce", "9zWH6qe0qG7Lc1telCn7FhUbLyVdjEaL3MO5uHxn8", "oauth_verifier", "pDNg57prOHapMbhv25RNf75lVRd6JDsni1AJJIDYoTY",
+			Description = "From https://github.com/request/oauth-sign/blob/18a2513da6ba7a2c0cd8179170d7c296c7625137/test.js")]
+		[TestCase("POST&http%3A%2F%2Fapi.twitter.com%2F1%2Fstatuses%2Fupdate.json&oauth_consumer_key%3DGDdmIQH6jhtmLUypg82g%26oauth_nonce%3DoElnnMTQIZvqvlfXM56aBLAf5noGD0AQR3Fmi7Q6Y%26oauth_signature_method%3DHMAC-SHA256%26oauth_timestamp%3D1272325550%26oauth_token%3D819797-Jxq8aYUDRmykzVKrgoLhXSq67TEa5ruc4GJC2rWimw%26oauth_version%3D1.0%26status%3Dsetting%2520up%2520my%2520twitter%2520%25E7%25A7%2581%25E3%2581%25AE%25E3%2581%2595%25E3%2581%2588%25E3%2581%259A%25E3%2582%258A%25E3%2582%2592%25E8%25A8%25AD%25E5%25AE%259A%25E3%2581%2599%25E3%2582%258B",
+			"xYhKjozxc3NYef7C26WU+gORdhEURdZRxSDzRttEKH0=", "http://api.twitter.com/1/statuses/update.json", "POST", "MCD8BKwGdgPHvAuvgvz4EQpqDAtx89grbuNMRd7Eh98", "J6zix3FfA9LofH0awS24M3HcBYXO5nI1iYe8EfBA",
+			"oauth_consumer_key", "GDdmIQH6jhtmLUypg82g", "oauth_signature_method", "HMAC-SHA256", "oauth_token", "819797-Jxq8aYUDRmykzVKrgoLhXSq67TEa5ruc4GJC2rWimw", "oauth_timestamp", "1272325550", "oauth_version", "1.0", "oauth_nonce", "oElnnMTQIZvqvlfXM56aBLAf5noGD0AQR3Fmi7Q6Y", "status", "setting up my twitter 私のさえずりを設定する",
+			Description = "From https://github.com/request/oauth-sign/blob/18a2513da6ba7a2c0cd8179170d7c296c7625137/test.js")]
+		[TestCase("POST&http%3A%2F%2Fwordpress.com%2Fwp-json&filter%255Bnumber%255D%3D-1%26oauth_consumer_key%3DGDdmIQH6jhtmLUypg82g%26oauth_nonce%3DoElnnMTQIZvqvlfXM56aBLAf5noGD0AQR3Fmi7Q6Y%26oauth_signature_method%3DHMAC-SHA256%26oauth_timestamp%3D1272325550%26oauth_token%3D819797-Jxq8aYUDRmykzVKrgoLhXSq67TEa5ruc4GJC2rWimw%26oauth_version%3D1.0",
+			"6hXbe84vZjenN4Il6ko0dpIBxUXrWj4SBFoBwgCIK+8=", "http://wordpress.com/wp-json", "POST", "MCD8BKwGdgPHvAuvgvz4EQpqDAtx89grbuNMRd7Eh98", "J6zix3FfA9LofH0awS24M3HcBYXO5nI1iYe8EfBA",
+			"oauth_consumer_key", "GDdmIQH6jhtmLUypg82g", "oauth_signature_method", "HMAC-SHA256", "oauth_token", "819797-Jxq8aYUDRmykzVKrgoLhXSq67TEa5ruc4GJC2rWimw", "oauth_timestamp", "1272325550", "oauth_version", "1.0", "oauth_nonce", "oElnnMTQIZvqvlfXM56aBLAf5noGD0AQR3Fmi7Q6Y", "filter[number]", "-1",
+			Description = "From https://github.com/request/oauth-sign/blob/18a2513da6ba7a2c0cd8179170d7c296c7625137/test.js")]
+		public void CreateHmacSha256Signature(string expectedSignatureBase, string expectedSignature, string uri, string httpMethod, string consumerSecret, string tokenSecret, params string[] parameters)
+		{
+			var signatureBase = OAuthUtility.CreateSignatureBase(new Uri(uri), httpMethod, ToPairs(parameters).ToList(), out _);
+
+			Assert.AreEqual(expectedSignatureBase, signatureBase);
+			Assert.AreEqual(expectedSignature, OAuthUtility.CreateHmacSha256Signature(signatureBase, consumerSecret, tokenSecret));
+		}
+
+		[TestCase("https://api.twitter.com/oauth/request_token", "POST", "GDdmIQH6jhtmLUypg82g", "MCD8BKwGdgPHvAuvgvz4EQpqDAtx89grbuNMRd7Eh98", "QP70eNmVz8jvdPevU3oJD2AfF7R7odC2XJcn4XlZJqk", 1272323042, "http://localhost:3005/the_dance/process_callback?service_provider_id=11", "N0KBpiPbuPIMx2B77eIg7tNfGNF81iq3bcO9RO6lH+k=",
+			Description = "From https://github.com/request/oauth-sign/blob/18a2513da6ba7a2c0cd8179170d7c296c7625137/test.js")]
+		public void CreateHmacSha256AuthorizationHeader(string uri, string httpMethod, string consumerToken, string consumerSecret, string nonce, long timestamp, string callback, string expectedSignature)
+		{
+			var nonceCreator = new TestNonceCreator(nonce);
+			var systemTime = new TestSystemTime(timestamp);
+			
+			var header = OAuthUtility.CreateHmacSha256AuthorizationHeaderValue(new Uri(uri), httpMethod, consumerToken, consumerSecret, callback: callback, nonceCreator: nonceCreator, systemTime: systemTime);
+			AssertAuthorizationHeader(header, new[] { "oauth_consumer_key", consumerToken, "oauth_nonce", nonce, "oauth_timestamp", timestamp.ToInvariantString(), "oauth_signature_method", "HMAC-SHA256", "oauth_version", "1.0", "oauth_callback", callback, "oauth_signature", expectedSignature });
+		}
+
+		[TestCase("OAuth oauth_consumer_key=\"GDdmIQH6jhtmLUypg82g\",oauth_nonce=\"9zWH6qe0qG7Lc1telCn7FhUbLyVdjEaL3MO5uHxn8\",oauth_signature_method=\"HMAC-SHA256\",oauth_timestamp=\"1272323047\",oauth_version=\"1.0\",oauth_token=\"8ldIZyxQeVrFZXFOZH5tAwj6vzJYuLQpl0WUEYtWc\",oauth_verifier=\"pDNg57prOHapMbhv25RNf75lVRd6JDsni1AJJIDYoTY\",oauth_signature=\"y7S9eUhA0tC9%2FYfRzCPqkg3%2FbUdYRDpZ93Xi51AvhjQ%3D\"",
+			"https://api.twitter.com/oauth/access_token", "POST", "GDdmIQH6jhtmLUypg82g", "MCD8BKwGdgPHvAuvgvz4EQpqDAtx89grbuNMRd7Eh98", "8ldIZyxQeVrFZXFOZH5tAwj6vzJYuLQpl0WUEYtWc", "x6qpRnlEmW9JbQn4PQVVeVG8ZLPEx6A0TOebgwcuA", "pDNg57prOHapMbhv25RNf75lVRd6JDsni1AJJIDYoTY", "9zWH6qe0qG7Lc1telCn7FhUbLyVdjEaL3MO5uHxn8", 1272323047,
+			Description = "From https://github.com/request/oauth-sign/blob/18a2513da6ba7a2c0cd8179170d7c296c7625137/test.js")]
+		public void CreateHmacSha256AuthorizationHeader2(string expectedHeader, string uri, string httpMethod, string consumerToken, string consumerSecret, string token, string tokenSecret, string verifier, string nonce, long timestamp)
+		{
+			var nonceCreator = new TestNonceCreator(nonce);
+			var systemTime = new TestSystemTime(timestamp);
+
+			var header = OAuthUtility.CreateHmacSha256AuthorizationHeaderValue(new Uri(uri), httpMethod, consumerToken, consumerSecret, token, tokenSecret, verifier: verifier, nonceCreator: nonceCreator, systemTime: systemTime);
 			Assert.AreEqual(expectedHeader, header);
 		}
 
@@ -120,26 +166,20 @@ namespace Faithlife.OAuth.Tests
 
 		private sealed class TestNonceCreator : INonceCreator
 		{
-			public TestNonceCreator(string nonce)
-			{
-				m_nonce = nonce;
-			}
+			public TestNonceCreator(string nonce) => m_nonce = nonce;
 
 			public string CreateNonce() => m_nonce;
 
-			readonly string m_nonce;
+			private readonly string m_nonce;
 		}
 
 		private sealed class TestSystemTime : ISystemTime
 		{
-			public TestSystemTime(long timestamp)
-			{
-				m_timestamp = timestamp;
-			}
+			public TestSystemTime(long timestamp) => m_timestamp = timestamp;
 
 			public DateTime GetUtcNow() => DateTimeUtility.FromUnixTimestamp(m_timestamp);
 
-			readonly long m_timestamp;
+			private readonly long m_timestamp;
 		}
 	}
 }

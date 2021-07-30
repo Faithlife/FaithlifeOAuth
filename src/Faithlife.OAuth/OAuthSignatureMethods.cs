@@ -11,6 +11,11 @@ namespace Faithlife.OAuth
 		public const string HmacSha1 = "HMAC-SHA1";
 
 		/// <summary>
+		/// HMAC-SHA256
+		/// </summary>
+		public const string HmacSha256 = "HMAC-SHA256";
+
+		/// <summary>
 		/// Plain text
 		/// </summary>
 		public const string PlainText = "PLAINTEXT";
