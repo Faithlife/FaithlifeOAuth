@@ -165,16 +165,25 @@ namespace Faithlife.OAuth
 		/// <summary>
 		/// Create OAuth authentication header using the HMACSHA256 signature method.
 		/// </summary>
-		public static string CreateHmacSha256AuthorizationHeaderValue(Uri uri, string httpMethod, string consumerToken, string consumerSecret, string accessToken, string accessSecret, INonceCreator? nonceCreator = null, ISystemTime? systemTime = null) =>
-			CreateHmacSha256AuthorizationHeaderValue(uri, httpMethod, consumerSecret, accessSecret, GetHmacSha256Parameters(consumerToken, nonceCreator ?? s_nonceCreator, systemTime ?? s_systemTime, new List<KeyValuePair<string, string>> { NewKeyValuePair(OAuthConstants.Token, accessToken) }));
+		public static string CreateHmacSha256AuthorizationHeaderValue(Uri uri, string httpMethod, string consumerToken, string consumerSecret, string? accessToken = null, string? accessSecret = null, string? callback = null, string? verifier = null, INonceCreator? nonceCreator = null, ISystemTime? systemTime = null)
+		{
+			var additionalParameters = new List<KeyValuePair<string, string>>();
+			if (accessToken != null)
+				additionalParameters.Add(NewKeyValuePair(OAuthConstants.Token, accessToken));
+			if(callback != null)
+				additionalParameters.Add(NewKeyValuePair(OAuthConstants.Callback, callback));
+			if(verifier != null)
+				additionalParameters.Add(NewKeyValuePair(OAuthConstants.Verifier, verifier));
+			return CreateHmacSha256AuthorizationHeaderValue(uri, httpMethod, consumerSecret, accessSecret, GetHmacSha256Parameters(consumerToken, nonceCreator ?? s_nonceCreator, systemTime ?? s_systemTime, additionalParameters));
+		}
 
-		internal static string CreateHmacSha256Signature(string signatureBase, string consumerSecret, string tokenSecret)
+		internal static string CreateHmacSha256Signature(string signatureBase, string consumerSecret, string? tokenSecret)
 		{
 			using var hmacsha256 = new HMACSHA256(Encoding.UTF8.GetBytes(CreatePlainTextSignature(consumerSecret, tokenSecret)));
 			return Convert.ToBase64String(hmacsha256.ComputeHash(Encoding.UTF8.GetBytes(signatureBase)));
 		}
 
-		private static string CreateHmacSha256AuthorizationHeaderValue(Uri uri, string httpMethod, string consumerSecret, string tokenSecret, ICollection<KeyValuePair<string, string>> parameters)
+		private static string CreateHmacSha256AuthorizationHeaderValue(Uri uri, string httpMethod, string consumerSecret, string? tokenSecret, ICollection<KeyValuePair<string, string>> parameters)
 		{
 			string signatureBase = CreateSignatureBase(uri, httpMethod, parameters, out var newUri);
 
