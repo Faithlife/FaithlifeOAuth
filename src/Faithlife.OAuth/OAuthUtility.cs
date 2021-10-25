@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
@@ -160,6 +161,7 @@ namespace Faithlife.OAuth
 			return builder.ToString();
 		}
 
+		[SuppressMessage("Security", "CA5350:Do Not Use Weak Cryptographic Algorithms", Justification = "By design.")]
 		internal static string CreateHmacSha1Signature(string signatureBase, string consumerSecret, string? tokenSecret)
 		{
 			using var hmacsha1 = new HMACSHA1(Encoding.UTF8.GetBytes(CreatePlainTextSignature(consumerSecret, tokenSecret)));
@@ -196,7 +198,7 @@ namespace Faithlife.OAuth
 				{ OAuthConstants.ConsumerKey, consumerToken },
 				{ OAuthConstants.Signature, signature },
 				{ OAuthConstants.SignatureMethod, OAuthSignatureMethods.PlainText },
-				{ OAuthConstants.Version, OAuthConstants.OAuthVersion }
+				{ OAuthConstants.Version, OAuthConstants.OAuthVersion },
 			}.Union(additionalParameters).ToDictionary(x => x.Key, x => x.Value);
 
 			return OAuthConstants.HeaderPrefix + " " + parameters
@@ -231,7 +233,7 @@ namespace Faithlife.OAuth
 				{ OAuthConstants.Nonce, nonce },
 				{ OAuthConstants.SignatureMethod, OAuthSignatureMethods.HmacSha1 },
 				{ OAuthConstants.TimeStamp, timeStamp },
-				{ OAuthConstants.Version, OAuthConstants.OAuthVersion }
+				{ OAuthConstants.Version, OAuthConstants.OAuthVersion },
 			};
 			if (additionalParameters is object)
 			{
@@ -247,7 +249,7 @@ namespace Faithlife.OAuth
 		internal static IEnumerable<KeyValuePair<string, string>> GetQueryParameters(string query)
 		{
 			if (query is null || query.Length < 2 || query[0] != '?')
-				return new KeyValuePair<string, string>[0];
+				return Array.Empty<KeyValuePair<string, string>>();
 
 			return query.Substring(1)
 				.Split('&')
@@ -258,8 +260,8 @@ namespace Faithlife.OAuth
 		private static bool IsUnreserved(byte value) =>
 			(value >= '0' && value <= '9') || (value >= 'A' && value <= 'Z') || (value >= 'a' && value <= 'z') || s_unencodedPunctuation.Contains(value);
 
-		static readonly INonceCreator s_nonceCreator = new GuidNonceCreator();
-		static readonly ISystemTime s_systemTime = new StandardSystemTime();
-		static readonly byte[] s_unencodedPunctuation = Encoding.UTF8.GetBytes(new[] { '-', '.', '_', '~' });
+		private static readonly INonceCreator s_nonceCreator = new GuidNonceCreator();
+		private static readonly ISystemTime s_systemTime = new StandardSystemTime();
+		private static readonly byte[] s_unencodedPunctuation = Encoding.UTF8.GetBytes(new[] { '-', '.', '_', '~' });
 	}
 }

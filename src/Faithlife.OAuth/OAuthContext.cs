@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Net;
 using System.Security.Cryptography;
@@ -181,7 +182,7 @@ namespace Faithlife.OAuth
 
 			return new WebHeaderCollection
 			{
-				[HttpRequestHeader.Authorization] = "{0} {1}".FormatInvariant(OAuthConstants.HeaderPrefix, headerStringValue)
+				[HttpRequestHeader.Authorization] = "{0} {1}".FormatInvariant(OAuthConstants.HeaderPrefix, headerStringValue),
 			};
 		}
 
@@ -202,6 +203,7 @@ namespace Faithlife.OAuth
 
 		private string? RequestTokenSecret { get; set; }
 
+		[SuppressMessage("Security", "CA5350:Do Not Use Weak Cryptographic Algorithms", Justification = "By design.")]
 		private string CreateSignature(string requestMethod, Uri uri, bool authorizedRequest, IEnumerable<Parameter> parameters)
 		{
 			if (m_signatureMethod != OAuthSignatureMethods.HmacSha1)
@@ -218,8 +220,8 @@ namespace Faithlife.OAuth
 		private static string CreateSignatureBase(string requestMethod, Uri uri, IEnumerable<Parameter> parameters)
 		{
 			var builder = new StringBuilder();
-			builder.AppendFormat("{0}&", requestMethod.ToUpperInvariant());
-			builder.AppendFormat("{0}&", GetNormalizedUrl(uri));
+			builder.AppendFormatInvariant("{0}&", requestMethod.ToUpperInvariant());
+			builder.AppendFormatInvariant("{0}&", GetNormalizedUrl(uri));
 			builder.Append(GetNormalizedParameters(parameters));
 
 			return builder.ToString();
@@ -236,8 +238,8 @@ namespace Faithlife.OAuth
 
 		private ReadOnlyCollection<Parameter> SortParameters(IEnumerable<Parameter> parameters) =>
 			parameters
-				.OrderBy(p => p.Key)
-				.ThenBy(p => p.Value)
+				.OrderBy(p => p.Key, StringComparer.Ordinal)
+				.ThenBy(p => p.Value, StringComparer.Ordinal)
 				.ToList().AsReadOnly();
 
 		private string GetNormalizedKeyString(bool authorizedRequest) =>
@@ -291,8 +293,8 @@ namespace Faithlife.OAuth
 			public bool IsEncoded { get; set; }
 		}
 
-		readonly string m_consumerKey;
-		readonly string m_consumerSecret;
-		readonly string m_signatureMethod;
+		private readonly string m_consumerKey;
+		private readonly string m_consumerSecret;
+		private readonly string m_signatureMethod;
 	}
 }

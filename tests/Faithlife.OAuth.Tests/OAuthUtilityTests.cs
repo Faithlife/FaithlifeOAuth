@@ -115,7 +115,7 @@ namespace Faithlife.OAuth.Tests
 				parameters.Remove(expected.Key);
 			}
 
-			Assert.AreEqual(new KeyValuePair<string, string>[0], parameters);
+			Assert.AreEqual(Array.Empty<KeyValuePair<string, string>>(), parameters);
 		}
 
 		private sealed class TestNonceCreator : INonceCreator
@@ -127,7 +127,7 @@ namespace Faithlife.OAuth.Tests
 
 			public string CreateNonce() => m_nonce;
 
-			readonly string m_nonce;
+			private readonly string m_nonce;
 		}
 
 		private sealed class TestSystemTime : ISystemTime
@@ -139,7 +139,7 @@ namespace Faithlife.OAuth.Tests
 
 			public DateTime GetUtcNow() => DateTimeUtility.FromUnixTimestamp(m_timestamp);
 
-			readonly long m_timestamp;
+			private readonly long m_timestamp;
 		}
 	}
 }

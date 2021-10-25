@@ -54,7 +54,7 @@ namespace Faithlife.OAuth
 			headerParameters = new string[]
 			{
 				OAuthConstants.Token, context.RequestToken!,
-				OAuthConstants.Verifier, parameters[OAuthConstants.Verifier]
+				OAuthConstants.Verifier, parameters[OAuthConstants.Verifier],
 			};
 
 			return true;

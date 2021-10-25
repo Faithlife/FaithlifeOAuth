@@ -4,7 +4,7 @@ using Faithlife.Utility;
 namespace Faithlife.OAuth
 {
 	/// <summary>
-	///	 <see cref="GuidNonceCreator"/> creates a new nonce by creating a GUID and converting it to a string.
+	/// <see cref="GuidNonceCreator"/> creates a new nonce by creating a GUID and converting it to a string.
 	/// </summary>
 	public sealed class GuidNonceCreator : INonceCreator
 	{
