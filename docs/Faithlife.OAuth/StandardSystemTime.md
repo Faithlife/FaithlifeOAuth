@@ -15,7 +15,7 @@ public sealed class StandardSystemTime : ISystemTime
 
 ## See Also
 
-* interface [ISystemTime](ISystemTime.md)
+* interface [ISystemTime](./ISystemTime.md)
 * namespace [Faithlife.OAuth](../Faithlife.OAuth.md)
 * [StandardSystemTime.cs](https://github.com/Faithlife/FaithlifeOAuth/tree/master/src/Faithlife.OAuth/StandardSystemTime.cs)
 

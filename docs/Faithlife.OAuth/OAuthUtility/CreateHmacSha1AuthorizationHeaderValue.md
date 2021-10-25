@@ -4,8 +4,8 @@ Create OAuth authentication header using the HMACSHA1 signature method.
 
 ```csharp
 public static string CreateHmacSha1AuthorizationHeaderValue(Uri uri, string httpMethod, 
-    string consumerToken, string consumerSecret, INonceCreator nonceCreator = null, 
-    ISystemTime systemTime = null)
+    string consumerToken, string consumerSecret, INonceCreator? nonceCreator = null, 
+    ISystemTime? systemTime = null)
 ```
 
 ## See Also
@@ -24,7 +24,7 @@ Create OAuth authentication header using the HMACSHA1 signature method.
 ```csharp
 public static string CreateHmacSha1AuthorizationHeaderValue(Uri uri, string httpMethod, 
     string consumerToken, string consumerSecret, string callback, 
-    INonceCreator nonceCreator = null, ISystemTime systemTime = null)
+    INonceCreator? nonceCreator = null, ISystemTime? systemTime = null)
 ```
 
 ## See Also
@@ -43,7 +43,7 @@ Create OAuth authentication header using the HMACSHA1 signature method.
 ```csharp
 public static string CreateHmacSha1AuthorizationHeaderValue(Uri uri, string httpMethod, 
     string consumerToken, string consumerSecret, string accessToken, string accessSecret, 
-    INonceCreator nonceCreator = null, ISystemTime systemTime = null)
+    INonceCreator? nonceCreator = null, ISystemTime? systemTime = null)
 ```
 
 ## See Also
@@ -62,7 +62,7 @@ Create OAuth authentication header using the HMACSHA1 signature method.
 ```csharp
 public static string CreateHmacSha1AuthorizationHeaderValue(Uri uri, string httpMethod, 
     string consumerToken, string consumerSecret, string temporaryToken, string temporarySecret, 
-    string verifier, INonceCreator nonceCreator = null, ISystemTime systemTime = null)
+    string verifier, INonceCreator? nonceCreator = null, ISystemTime? systemTime = null)
 ```
 
 ## See Also

@@ -3,7 +3,7 @@
 Gets the request token.
 
 ```csharp
-public string RequestToken { get; }
+public string? RequestToken { get; }
 ```
 
 ## See Also

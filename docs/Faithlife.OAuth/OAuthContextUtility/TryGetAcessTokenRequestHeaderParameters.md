@@ -4,7 +4,7 @@ Tries to get the acess token request header parameters.
 
 ```csharp
 public static bool TryGetAcessTokenRequestHeaderParameters(OAuthContext context, Uri uri, 
-    out string[] headerParameters)
+    out string[]? headerParameters)
 ```
 
 | parameter | description |

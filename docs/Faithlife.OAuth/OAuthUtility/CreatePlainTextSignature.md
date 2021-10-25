@@ -3,7 +3,7 @@
 Create OAuth signature using the PLAINTEXT signature method.
 
 ```csharp
-public static string CreatePlainTextSignature(string consumerSecret, string tokenSecret)
+public static string CreatePlainTextSignature(string consumerSecret, string? tokenSecret)
 ```
 
 ## See Also

@@ -1,6 +1,6 @@
 # GuidNonceCreator class
 
-[`GuidNonceCreator`](GuidNonceCreator.md) creates a new nonce by creating a GUID and converting it to a string.
+[`GuidNonceCreator`](./GuidNonceCreator.md) creates a new nonce by creating a GUID and converting it to a string.
 
 ```csharp
 public sealed class GuidNonceCreator : INonceCreator
@@ -15,7 +15,7 @@ public sealed class GuidNonceCreator : INonceCreator
 
 ## See Also
 
-* interface [INonceCreator](INonceCreator.md)
+* interface [INonceCreator](./INonceCreator.md)
 * namespace [Faithlife.OAuth](../Faithlife.OAuth.md)
 * [GuidNonceCreator.cs](https://github.com/Faithlife/FaithlifeOAuth/tree/master/src/Faithlife.OAuth/GuidNonceCreator.cs)
 

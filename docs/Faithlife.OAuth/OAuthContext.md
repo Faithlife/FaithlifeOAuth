@@ -10,7 +10,7 @@ public class OAuthContext
 
 | name | description |
 | --- | --- |
-| [OAuthContext](OAuthContext/OAuthContext.md)(…) | Initializes a new instance of the [`OAuthContext`](OAuthContext.md) class. |
+| [OAuthContext](OAuthContext/OAuthContext.md)(…) | Initializes a new instance of the [`OAuthContext`](./OAuthContext.md) class. |
 | [AccessToken](OAuthContext/AccessToken.md) { get; } | Gets the access token. |
 | [AccessTokenSecret](OAuthContext/AccessTokenSecret.md) { get; } | Gets the access token secret. |
 | [HasRequestToken](OAuthContext/HasRequestToken.md) { get; } | Returns a value indicating if request token is present. |

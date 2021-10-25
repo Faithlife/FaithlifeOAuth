@@ -3,7 +3,7 @@
 Sets access credentials.
 
 ```csharp
-public void SetAccessTokenAndSecret(string accessToken, string accessSecret)
+public void SetAccessTokenAndSecret(string? accessToken, string? accessSecret)
 ```
 
 | parameter | description |

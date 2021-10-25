@@ -3,7 +3,7 @@
 Gets the access token secret.
 
 ```csharp
-public string AccessTokenSecret { get; }
+public string? AccessTokenSecret { get; }
 ```
 
 ## See Also

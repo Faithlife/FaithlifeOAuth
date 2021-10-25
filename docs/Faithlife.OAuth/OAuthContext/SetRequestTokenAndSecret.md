@@ -3,7 +3,7 @@
 Sets the request token and secret.
 
 ```csharp
-public void SetRequestTokenAndSecret(string requestToken, string requestTokenSecret)
+public void SetRequestTokenAndSecret(string? requestToken, string? requestTokenSecret)
 ```
 
 | parameter | description |
